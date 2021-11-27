@@ -737,8 +737,9 @@ func (v *View) Buffer() string {
 // ViewBufferLines returns the lines in the view's internal
 // buffer that is shown to the user.
 func (v *View) ViewBufferLines() []string {
-	lines := make([]string, len(v.lines))
-	for i, line := range v.lines {
+	viewLines := v.viewLines()
+	lines := make([]string, len(viewLines))
+	for i, line := range viewLines {
 		str := lineType(line).String()
 		str = strings.Replace(str, "\x00", " ", -1)
 		lines[i] = str
@@ -763,7 +764,7 @@ func (v *View) ViewLinesHeight() int {
 // ViewBuffer returns a string with the contents of the view's buffer that is
 // shown to the user.
 func (v *View) ViewBuffer() string {
-	return linesToString(v.lines)
+	return linesToString(v.viewLines())
 }
 
 // Line returns a string with the line of the view's internal buffer
@@ -909,7 +910,9 @@ func linesToString(lines [][]cell) string {
 		rns := make([]rune, 0, len(lines[i]))
 		line := lineType(lines[i]).String()
 		for _, c := range line {
-			if c != '\x00' {
+			if c == '\x00' {
+				rns = append(rns, ' ')
+			} else {
 				rns = append(rns, c)
 			}
 		}
