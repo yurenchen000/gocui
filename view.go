@@ -613,7 +613,11 @@ func (v *View) draw() error {
 			if err := v.setRune(x, y, char.chr, fgColor, bgColor); err != nil {
 				return err
 			}
-			x += runewidth.RuneWidth(char.chr)
+			if char.chr == 0 {
+				x++ // if NULL increase, so `SetWritePos` can be used (NULL translate to SPACE in setRune)
+			} else {
+				x += runewidth.RuneWidth(char.chr)
+			}
 		}
 		y++
 	}
@@ -846,7 +850,11 @@ func (v *View) SetHighlight(y int, on bool) error {
 
 func lineWidth(line []cell) (n int) {
 	for i := range line {
-		n += runewidth.RuneWidth(line[i].chr)
+		if line[i].chr == 0 {
+			n++ // if it's NULL character, it's translated to SPACE in setRune
+		} else {
+			n += runewidth.RuneWidth(line[i].chr)
+		}
 	}
 
 	return
@@ -872,7 +880,10 @@ func (v *View) takeLine(l *[]cell) (visableLine []cell, width int, end bool) {
 
 	for i, cell = range *l {
 		chr := cell.chr
-		charWidth := runewidth.RuneWidth(chr)
+		charWidth := 1 // default for NULL character (translated to SPACE in setRune)
+		if chr != 0 {
+			charWidth = runewidth.RuneWidth(chr)
+		}
 
 		if width+charWidth > maxX {
 			break
