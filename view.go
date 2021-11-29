@@ -613,7 +613,11 @@ func (v *View) draw() error {
 			if err := v.setRune(x, y, char.chr, fgColor, bgColor); err != nil {
 				return err
 			}
-			x += runewidth.RuneWidth(char.chr)
+			if char.chr == 0 {
+				x++ // if NULL increase, so `SetWritePos` can be used (NULL translate to SPACE in setRune)
+			} else {
+				x += runewidth.RuneWidth(char.chr)
+			}
 		}
 		y++
 	}
@@ -733,8 +737,9 @@ func (v *View) Buffer() string {
 // ViewBufferLines returns the lines in the view's internal
 // buffer that is shown to the user.
 func (v *View) ViewBufferLines() []string {
-	lines := make([]string, len(v.lines))
-	for i, line := range v.lines {
+	viewLines := v.viewLines()
+	lines := make([]string, len(viewLines))
+	for i, line := range viewLines {
 		str := lineType(line).String()
 		str = strings.Replace(str, "\x00", " ", -1)
 		lines[i] = str
@@ -759,7 +764,7 @@ func (v *View) ViewLinesHeight() int {
 // ViewBuffer returns a string with the contents of the view's buffer that is
 // shown to the user.
 func (v *View) ViewBuffer() string {
-	return linesToString(v.lines)
+	return linesToString(v.viewLines())
 }
 
 // Line returns a string with the line of the view's internal buffer
@@ -846,7 +851,11 @@ func (v *View) SetHighlight(y int, on bool) error {
 
 func lineWidth(line []cell) (n int) {
 	for i := range line {
-		n += runewidth.RuneWidth(line[i].chr)
+		if line[i].chr == 0 {
+			n++ // if it's NULL character, it's translated to SPACE in setRune
+		} else {
+			n += runewidth.RuneWidth(line[i].chr)
+		}
 	}
 
 	return
@@ -872,9 +881,13 @@ func (v *View) takeLine(l *[]cell) (visableLine []cell, width int, end bool) {
 
 	for i, cell = range *l {
 		chr := cell.chr
-		charWidth := runewidth.RuneWidth(chr)
+		charWidth := 1 // default for NULL character (translated to SPACE in setRune)
+		if chr != 0 {
+			charWidth = runewidth.RuneWidth(chr)
+		}
 
 		if width+charWidth > maxX {
+			i-- // decrease as this character is not included
 			break
 		}
 
@@ -898,7 +911,9 @@ func linesToString(lines [][]cell) string {
 		rns := make([]rune, 0, len(lines[i]))
 		line := lineType(lines[i]).String()
 		for _, c := range line {
-			if c != '\x00' {
+			if c == '\x00' {
+				rns = append(rns, ' ')
+			} else {
 				rns = append(rns, c)
 			}
 		}
