@@ -887,6 +887,7 @@ func (v *View) takeLine(l *[]cell) (visableLine []cell, width int, end bool) {
 		}
 
 		if width+charWidth > maxX {
+			i-- // decrease as this character is not included
 			break
 		}
 
