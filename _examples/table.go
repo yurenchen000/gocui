@@ -43,7 +43,7 @@ func (t *Table) Layout(g *gocui.Gui) error {
 	width, height := view.Size()
 	hOffset := 0
 	for cid, column := range t.Columns {
-		size := int(float32(width) * column.Size)
+		size := int(float32(width+1) * column.Size)
 
 		view.SetWritePos(hOffset, 0)
 		view.WriteString(column.Title)
@@ -53,7 +53,7 @@ func (t *Table) Layout(g *gocui.Gui) error {
 				view.SetWritePos(hOffset, rid+1)
 				view.WriteString(t.Data[cid][rid])
 			}
-			view.SetWritePos(hOffset+size-3, rid)
+			view.SetWritePos(hOffset+size-1, rid)
 			view.WriteRunes([]rune{'│'})
 		}
 
@@ -70,7 +70,7 @@ func main() {
 	}
 	defer g.Close()
 
-	table := NewTable("t", 1, 2, 80, 10)
+	table := NewTable("t", 0, 2, 80, 10)
 	table.Columns = []Column{
 		{"Column1", 0.25},
 		{"Column2", 0.25},

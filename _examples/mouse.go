@@ -19,7 +19,7 @@ func main() {
 	}
 	defer g.Close()
 
-	g.Cursor = true
+	g.Cursor = false
 	g.Mouse = true
 
 	g.SetManagerFunc(layout)

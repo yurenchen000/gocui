@@ -78,6 +78,12 @@ func initKeybindings(g *gocui.Gui) error {
 		}); err != nil {
 		return err
 	}
+	if err := g.SetKeybinding("", gocui.KeyBackspace, gocui.ModNone,
+		func(g *gocui.Gui, v *gocui.View) error {
+			return delView(g)
+		}); err != nil {
+		return err
+	}
 	if err := g.SetKeybinding("", gocui.KeyBackspace2, gocui.ModNone,
 		func(g *gocui.Gui, v *gocui.View) error {
 			return delView(g)
