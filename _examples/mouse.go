@@ -33,7 +33,13 @@ func main() {
 	}
 }
 
+var initialMouseX, initialMouseY, xOffset int
+var msgMouseDown, movingMsg bool
+
 func layout(g *gocui.Gui) error {
+	if _, err := g.View("msg"); msgMouseDown && err == nil {
+		moveMsg(g)
+	}
 	if v, err := g.SetView("but1", 2, 2, 22, 7, 0); err != nil {
 		if !errors.Is(err, gocui.ErrUnknownView) {
 			return err
@@ -70,13 +76,10 @@ func keybindings(g *gocui.Gui) error {
 			return err
 		}
 	}
-	if err := g.SetKeybinding("msg", gocui.MouseLeft, gocui.ModNone, delMsg); err != nil {
+	if err := g.SetKeybinding("", gocui.MouseRelease, gocui.ModNone, mouseUp); err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("", gocui.MouseRight, gocui.ModNone, delMsg); err != nil {
-		return err
-	}
-	if err := g.SetKeybinding("", gocui.MouseMiddle, gocui.ModNone, delMsg); err != nil {
+	if err := g.SetKeybinding("msg", gocui.MouseLeft, gocui.ModNone, msgDown); err != nil {
 		return err
 	}
 	return nil
@@ -100,17 +103,38 @@ func showMsg(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	maxX, maxY := g.Size()
-	if v, err := g.SetView("msg", maxX/2-10, maxY/2, maxX/2+10, maxY/2+2, 0); err != nil {
-		if !errors.Is(err, gocui.ErrUnknownView) {
-			return err
-		}
+	if v, err := g.SetView("msg", maxX/2-10, maxY/2, maxX/2+10, maxY/2+2, 0); err == nil || errors.Is(err, gocui.ErrUnknownView) {
+		v.Clear()
 		fmt.Fprintln(v, l)
 	}
 	return nil
 }
 
-func delMsg(g *gocui.Gui, v *gocui.View) error {
-	// Error check removed, because delete could be called multiple times with the above keybindings
-	g.DeleteView("msg")
+func moveMsg(g *gocui.Gui) {
+	mx, my := g.MousePosition()
+	if !movingMsg && (mx != initialMouseX || my != initialMouseY) {
+		movingMsg = true
+	}
+	g.SetView("msg", mx-xOffset, my-1, mx-xOffset+20, my+1, 0)
+}
+
+func msgDown(g *gocui.Gui, v *gocui.View) error {
+	initialMouseX, initialMouseY = g.MousePosition()
+	xOffset, _ = v.Cursor()
+	xOffset += 1
+	msgMouseDown = true
+	return nil
+}
+
+func mouseUp(g *gocui.Gui, v *gocui.View) error {
+	if msgMouseDown {
+		msgMouseDown = false
+		if movingMsg {
+			movingMsg = false
+			return nil
+		} else {
+			g.DeleteView("msg")
+		}
+	}
 	return nil
 }
