@@ -179,15 +179,19 @@ func pollEvent() gocuiEvent {
 		// process mouse wheel
 		if button&tcell.WheelUp != 0 {
 			mouseKey = MouseWheelUp
+			mouseMod = Modifier(tev.Modifiers())
 		}
 		if button&tcell.WheelDown != 0 {
 			mouseKey = MouseWheelDown
+			mouseMod = Modifier(tev.Modifiers())
 		}
 		if button&tcell.WheelLeft != 0 {
 			mouseKey = MouseWheelLeft
+			mouseMod = Modifier(tev.Modifiers())
 		}
 		if button&tcell.WheelRight != 0 {
 			mouseKey = MouseWheelRight
+			mouseMod = Modifier(tev.Modifiers())
 		}
 
 		// process button events (not wheel events)
