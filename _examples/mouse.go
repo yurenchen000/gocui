@@ -44,7 +44,6 @@ func layout(g *gocui.Gui) error {
 		if !errors.Is(err, gocui.ErrUnknownView) {
 			return err
 		}
-		v.Highlight = true
 		v.SelBgColor = gocui.ColorGreen
 		v.SelFgColor = gocui.ColorBlack
 		fmt.Fprintln(v, "Button 1 - line 1")
@@ -59,11 +58,11 @@ func layout(g *gocui.Gui) error {
 		if !errors.Is(err, gocui.ErrUnknownView) {
 			return err
 		}
-		v.Highlight = true
 		v.SelBgColor = gocui.ColorGreen
 		v.SelFgColor = gocui.ColorBlack
 		fmt.Fprintln(v, "Button 2 - line 1")
 	}
+	updateHighlightedView(g)
 	return nil
 }
 
@@ -105,9 +104,21 @@ func showMsg(g *gocui.Gui, v *gocui.View) error {
 	maxX, maxY := g.Size()
 	if v, err := g.SetView("msg", maxX/2-10, maxY/2, maxX/2+10, maxY/2+2, 0); err == nil || errors.Is(err, gocui.ErrUnknownView) {
 		v.Clear()
+		v.SelBgColor = gocui.ColorCyan
+		v.SelFgColor = gocui.ColorBlack
 		fmt.Fprintln(v, l)
 	}
 	return nil
+}
+
+func updateHighlightedView(g *gocui.Gui) {
+	mx, my := g.MousePosition()
+	for _, view := range g.Views() {
+		view.Highlight = false
+	}
+	if v, err := g.ViewByPosition(mx, my); err == nil {
+		v.Highlight = true
+	}
 }
 
 func moveMsg(g *gocui.Gui) {
