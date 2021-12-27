@@ -33,7 +33,7 @@ func main() {
 	}
 }
 
-var initialMouseX, initialMouseY, xOffset int
+var initialMouseX, initialMouseY, xOffset, yOffset int
 var globalMouseDown, msgMouseDown, movingMsg bool
 
 func layout(g *gocui.Gui) error {
@@ -136,20 +136,27 @@ func moveMsg(g *gocui.Gui) {
 	if !movingMsg && (mx != initialMouseX || my != initialMouseY) {
 		movingMsg = true
 	}
-	g.SetView("msg", mx-xOffset, my-1, mx-xOffset+20, my+1, 0)
+	g.SetView("msg", mx-xOffset, my-yOffset, mx-xOffset+20, my-yOffset+2, 0)
 }
 
 func msgDown(g *gocui.Gui, v *gocui.View) error {
 	initialMouseX, initialMouseY = g.MousePosition()
-	xOffset, _ = v.Cursor()
-	xOffset += 1
-	msgMouseDown = true
+	if vx, vy, _, _, err := g.ViewPosition("msg"); err == nil {
+		xOffset = initialMouseX - vx
+		yOffset = initialMouseY - vy
+		msgMouseDown = true
+	}
 	return nil
 }
 
 func globalDown(g *gocui.Gui, v *gocui.View) error {
-	globalMouseDown = true
 	mx, my := g.MousePosition()
+	if vx0, vy0, vx1, vy1, err := g.ViewPosition("msg"); err == nil {
+		if mx >= vx0 && mx <= vx1 && my >= vy0 && my <= vy1 {
+			return msgDown(g, v)
+		}
+	}
+	globalMouseDown = true
 	maxX, _ := g.Size()
 	msg := fmt.Sprintf("Mouse down at: %d,%d", mx, my)
 	x := mx - len(msg)/2
