@@ -144,6 +144,7 @@ func NewGui(mode OutputMode, supportOverlaps bool) (*Gui, error) {
 		g.maxX, g.maxY = screen.Size()
 	}
 
+	g.mouseX, g.mouseY = -1, -1
 	g.BgColor, g.FgColor, g.FrameColor = ColorDefault, ColorDefault, ColorDefault
 	g.SelBgColor, g.SelFgColor, g.SelFrameColor = ColorDefault, ColorDefault, ColorDefault
 
