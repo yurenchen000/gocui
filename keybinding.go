@@ -286,8 +286,8 @@ const (
 
 // Modifiers.
 const (
-	ModNone Modifier = Modifier(0)
-	ModAlt           = Modifier(tcell.ModAlt)
-	// ModCtrl doesn't work with keyboard keys. Use CtrlKey in Key and ModNone. This is was for mouse clicks only (tcell.v1)
-	// ModCtrl = Modifier(tcell.ModCtrl)
+	ModNone       Modifier = Modifier(0)
+	ModAlt                 = Modifier(tcell.ModAlt)
+	ModMouseShift          = Modifier(tcell.ModShift)
+	ModMouseCtrl           = Modifier(tcell.ModCtrl)
 )
