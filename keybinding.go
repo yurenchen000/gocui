@@ -288,7 +288,6 @@ const (
 const (
 	ModNone       Modifier = Modifier(0)
 	ModAlt                 = Modifier(tcell.ModAlt)
-	ModMouseAlt            = Modifier(tcell.ModAlt)
 	ModMouseShift          = Modifier(tcell.ModShift)
 	ModMouseCtrl           = Modifier(tcell.ModCtrl)
 )
