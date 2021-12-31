@@ -169,6 +169,8 @@ func (g *Gui) Size() (x, y int) {
 	return g.maxX, g.maxY
 }
 
+// MousePosition returns the last position of the mouse.
+// If no mouse event was triggered yet MousePosition will return -1, -1.
 func (g *Gui) MousePosition() (x, y int) {
 	return g.mouseX, g.mouseY
 }
