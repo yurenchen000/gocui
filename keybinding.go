@@ -154,6 +154,7 @@ var translate = map[string]Key{
 	"Backspace":      KeyBackspace,
 	"CtrlH":          KeyCtrlH,
 	"Tab":            KeyTab,
+	"Backtab":        KeyBacktab,
 	"CtrlI":          KeyCtrlI,
 	"CtrlJ":          KeyCtrlJ,
 	"CtrlK":          KeyCtrlK,
@@ -235,6 +236,7 @@ const (
 	KeyBackspace      = Key(tcell.KeyBackspace)
 	KeyCtrlH          = Key(tcell.KeyCtrlH)
 	KeyTab            = Key(tcell.KeyTab)
+	KeyBacktab        = Key(tcell.KeyBacktab)
 	KeyCtrlI          = Key(tcell.KeyCtrlI)
 	KeyCtrlJ          = Key(tcell.KeyCtrlJ)
 	KeyCtrlK          = Key(tcell.KeyCtrlK)
