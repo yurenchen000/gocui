@@ -159,7 +159,7 @@ func pollEvent() gocuiEvent {
 			mod = 0
 			ch = rune(0)
 			k = tcell.KeyCtrlSpace
-		} else if mod == tcell.ModCtrl || mod == tcell.ModShift {
+		} else if mod == tcell.ModCtrl || mod == tcell.ModShift && ch != 0 {
 			// remove Ctrl or Shift if specified
 			// - shift - will be translated to the final code of rune
 			// - ctrl  - is translated in the key
