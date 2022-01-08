@@ -33,12 +33,24 @@ func main() {
 	}
 }
 
+var initialMouseX, initialMouseY, xOffset, yOffset int
+var globalMouseDown, msgMouseDown, movingMsg bool
+
 func layout(g *gocui.Gui) error {
+	maxX, maxY := g.Size()
+	if _, err := g.View("msg"); msgMouseDown && err == nil {
+		moveMsg(g)
+	}
+	if v, err := g.SetView("global", -1, -1, maxX, maxY, 0); err != nil {
+		if !errors.Is(err, gocui.ErrUnknownView) {
+			return err
+		}
+		v.Frame = false
+	}
 	if v, err := g.SetView("but1", 2, 2, 22, 7, 0); err != nil {
 		if !errors.Is(err, gocui.ErrUnknownView) {
 			return err
 		}
-		v.Highlight = true
 		v.SelBgColor = gocui.ColorGreen
 		v.SelFgColor = gocui.ColorBlack
 		fmt.Fprintln(v, "Button 1 - line 1")
@@ -53,11 +65,11 @@ func layout(g *gocui.Gui) error {
 		if !errors.Is(err, gocui.ErrUnknownView) {
 			return err
 		}
-		v.Highlight = true
 		v.SelBgColor = gocui.ColorGreen
 		v.SelFgColor = gocui.ColorBlack
 		fmt.Fprintln(v, "Button 2 - line 1")
 	}
+	updateHighlightedView(g)
 	return nil
 }
 
@@ -70,13 +82,13 @@ func keybindings(g *gocui.Gui) error {
 			return err
 		}
 	}
-	if err := g.SetKeybinding("msg", gocui.MouseLeft, gocui.ModNone, delMsg); err != nil {
+	if err := g.SetKeybinding("", gocui.MouseRelease, gocui.ModNone, mouseUp); err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("", gocui.MouseRight, gocui.ModNone, delMsg); err != nil {
+	if err := g.SetKeybinding("", gocui.MouseLeft, gocui.ModNone, globalDown); err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("", gocui.MouseMiddle, gocui.ModNone, delMsg); err != nil {
+	if err := g.SetKeybinding("msg", gocui.MouseLeft, gocui.ModNone, msgDown); err != nil {
 		return err
 	}
 	return nil
@@ -100,17 +112,80 @@ func showMsg(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	maxX, maxY := g.Size()
-	if v, err := g.SetView("msg", maxX/2-10, maxY/2, maxX/2+10, maxY/2+2, 0); err != nil {
-		if !errors.Is(err, gocui.ErrUnknownView) {
-			return err
-		}
+	if v, err := g.SetView("msg", maxX/2-10, maxY/2, maxX/2+10, maxY/2+2, 0); err == nil || errors.Is(err, gocui.ErrUnknownView) {
+		v.Clear()
+		v.SelBgColor = gocui.ColorCyan
+		v.SelFgColor = gocui.ColorBlack
 		fmt.Fprintln(v, l)
 	}
 	return nil
 }
 
-func delMsg(g *gocui.Gui, v *gocui.View) error {
-	// Error check removed, because delete could be called multiple times with the above keybindings
-	g.DeleteView("msg")
+func updateHighlightedView(g *gocui.Gui) {
+	mx, my := g.MousePosition()
+	for _, view := range g.Views() {
+		view.Highlight = false
+	}
+	if v, err := g.ViewByPosition(mx, my); err == nil {
+		v.Highlight = true
+	}
+}
+
+func moveMsg(g *gocui.Gui) {
+	mx, my := g.MousePosition()
+	if !movingMsg && (mx != initialMouseX || my != initialMouseY) {
+		movingMsg = true
+	}
+	g.SetView("msg", mx-xOffset, my-yOffset, mx-xOffset+20, my-yOffset+2, 0)
+}
+
+func msgDown(g *gocui.Gui, v *gocui.View) error {
+	initialMouseX, initialMouseY = g.MousePosition()
+	if vx, vy, _, _, err := g.ViewPosition("msg"); err == nil {
+		xOffset = initialMouseX - vx
+		yOffset = initialMouseY - vy
+		msgMouseDown = true
+	}
+	return nil
+}
+
+func globalDown(g *gocui.Gui, v *gocui.View) error {
+	mx, my := g.MousePosition()
+	if vx0, vy0, vx1, vy1, err := g.ViewPosition("msg"); err == nil {
+		if mx >= vx0 && mx <= vx1 && my >= vy0 && my <= vy1 {
+			return msgDown(g, v)
+		}
+	}
+	globalMouseDown = true
+	maxX, _ := g.Size()
+	msg := fmt.Sprintf("Mouse down at: %d,%d", mx, my)
+	x := mx - len(msg)/2
+	if x < 0 {
+		x = 0
+	} else if x+len(msg)+1 > maxX-1 {
+		x = maxX - 1 - len(msg) - 1
+	}
+	if v, err := g.SetView("globalDown", x, my-1, x+len(msg)+1, my+1, 0); err != nil {
+		if !errors.Is(err, gocui.ErrUnknownView) {
+			return err
+		}
+		v.WriteString(msg)
+	}
+	return nil
+}
+
+func mouseUp(g *gocui.Gui, v *gocui.View) error {
+	if msgMouseDown {
+		msgMouseDown = false
+		if movingMsg {
+			movingMsg = false
+			return nil
+		} else {
+			g.DeleteView("msg")
+		}
+	} else if globalMouseDown {
+		globalMouseDown = false
+		g.DeleteView("globalDown")
+	}
 	return nil
 }

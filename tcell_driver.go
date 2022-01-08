@@ -174,7 +174,7 @@ func pollEvent() gocuiEvent {
 	case *tcell.EventMouse:
 		x, y := tev.Position()
 		button := tev.Buttons()
-		mouseKey := MouseRelease
+		mouseKey := Key(0)
 		mouseMod := ModNone
 		// process mouse wheel
 		if button&tcell.WheelUp != 0 {
@@ -199,19 +199,21 @@ func pollEvent() gocuiEvent {
 		if button != tcell.ButtonNone && lastMouseKey == tcell.ButtonNone {
 			lastMouseKey = button
 			lastMouseMod = tev.Modifiers()
+			switch tev.Buttons() {
+			case tcell.ButtonPrimary:
+				mouseKey = MouseLeft
+			case tcell.ButtonSecondary:
+				mouseKey = MouseRight
+			case tcell.ButtonMiddle:
+				mouseKey = MouseMiddle
+			}
+			mouseMod = Modifier(lastMouseMod)
 		}
 
 		switch tev.Buttons() {
 		case tcell.ButtonNone:
 			if lastMouseKey != tcell.ButtonNone {
-				switch lastMouseKey {
-				case tcell.ButtonPrimary:
-					mouseKey = MouseLeft
-				case tcell.ButtonSecondary:
-					mouseKey = MouseRight
-				case tcell.ButtonMiddle:
-					mouseKey = MouseMiddle
-				}
+				mouseKey = MouseRelease
 				mouseMod = Modifier(lastMouseMod)
 				lastMouseMod = tcell.ModNone
 				lastMouseKey = tcell.ButtonNone
