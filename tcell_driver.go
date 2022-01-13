@@ -149,17 +149,17 @@ func pollEvent() gocuiEvent {
 			ch = tev.Rune()
 			if ch == ' ' {
 				// special handling for spacebar
-				k = 32 // tcell keys ends at 31 or starts at 256
+				k = tcell.Key(KeySpace) // tcell keys ends at 31 or starts at 256
 				ch = rune(0)
 			}
 		}
 		mod := tev.Modifiers()
 		// remove control modifier and setup special handling of ctrl+spacebar, etc.
-		if mod == tcell.ModCtrl && k == 32 {
+		if mod == tcell.ModCtrl && k == tcell.Key(KeySpace) {
 			mod = 0
 			ch = rune(0)
 			k = tcell.KeyCtrlSpace
-		} else if mod == tcell.ModCtrl || mod == tcell.ModShift {
+		} else if mod == tcell.ModCtrl || mod == tcell.ModShift && (ch != 0 || k == tcell.Key(KeySpace)) {
 			// remove Ctrl or Shift if specified
 			// - shift - will be translated to the final code of rune
 			// - ctrl  - is translated in the key
