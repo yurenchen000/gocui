@@ -897,7 +897,7 @@ func (g *Gui) onKey(ev *gocuiEvent) error {
 		if err != nil {
 			break
 		}
-		if err := v.SetCursor(mx-v.x0-1, my-v.y0-1); err != nil {
+		if err := v.SetCursor(mx-v.x0-1+v.ox, my-v.y0-1+v.oy); err != nil {
 			return err
 		}
 		if _, err := g.execKeybindings(v, ev); err != nil {
