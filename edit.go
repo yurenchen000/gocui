@@ -210,17 +210,14 @@ func (v *View) MoveCursor(dx, dy int) {
 		if newXOnScreen > v.ox+maxX-1 {
 			v.ox = newXOnScreen - maxX + 1
 		}
-		// if newXOnScreen < v.ox {
-		// 	v.ox = newXOnScreen
-		// }
-		// Size of the preview of the line in the beginning.
-		// This should help to display prior text of the line when
+		// Size of the line preview when moving to the left edge.
+		// This should help to display hidden text of the line when
 		// wrapping is off and moving towards beginning of the line.
-		// 2 is currently set
-		prevSize := 0
-		if newXOnScreen-2 >= 0 {
+		// 2 is currently set as the max length of characters which are visible.
+		prevSize := 0 // this is default, no preview (used when hitting the beginnig)
+		if maxX > 2 && newXOnScreen-2 >= 0 {
 			prevSize = 2
-		} else if newXOnScreen-1 >= 0 {
+		} else if maxX > 1 && newXOnScreen-1 >= 0 {
 			prevSize = 1
 		}
 		if newXOnScreen-prevSize < v.ox {
