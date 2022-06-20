@@ -128,7 +128,7 @@ func (v *View) EditDelete(back bool) {
 		}
 
 		previousLine := v.cy - 1
-		v.cx, v.cy = len(v.lines[previousLine]), previousLine
+		v.MoveCursor(-1, 0)
 		_ = v.mergeLines(previousLine)
 		return
 	}
@@ -153,7 +153,7 @@ func (v *View) EditNewLine() {
 	v.cx = 0
 }
 
-// MoveCursor mores the cursor relative from it's current possition
+// MoveCursor moves the cursor relative from it's current possition
 func (v *View) MoveCursor(dx, dy int) {
 	newX, newY := v.cx+dx, v.cy+dy
 
@@ -184,7 +184,7 @@ func (v *View) MoveCursor(dx, dy int) {
 		}
 	}
 
-	// If nexX is more less than 0 try goint to the previous line's last char
+	// If newX is less than 0 try goint to the previous line's last char
 	if newX < 0 {
 		if newY > 0 {
 			newY--
@@ -210,8 +210,18 @@ func (v *View) MoveCursor(dx, dy int) {
 		if newXOnScreen > v.ox+maxX-1 {
 			v.ox = newXOnScreen - maxX + 1
 		}
-		if newXOnScreen < v.ox {
-			v.ox = newXOnScreen
+		// Size of the line preview when moving to the left edge.
+		// This should help to display hidden text of the line when
+		// wrapping is off and moving towards beginning of the line.
+		// 2 is currently set as the max length of characters which are visible.
+		prevSize := 0 // this is default, no preview (used when hitting the beginnig)
+		if maxX > 2 && newXOnScreen-2 >= 0 {
+			prevSize = 2
+		} else if maxX > 1 && newXOnScreen-1 >= 0 {
+			prevSize = 1
+		}
+		if newXOnScreen-prevSize < v.ox {
+			v.ox = newXOnScreen - prevSize
 		}
 	}
 
