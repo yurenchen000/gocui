@@ -204,6 +204,7 @@ func TestTestingScreenReturnsCorrectContent(t *testing.T) {
 
 ## Projects using gocui
 
+- [omnivore](https://github.com/discoriver/omnivore): Distributed SSH commands with output matching.
 - [komanda-cli](https://github.com/mephux/komanda-cli): IRC Client For Developers.
 - [vuls](https://github.com/future-architect/vuls): Agentless vulnerability scanner for Linux/FreeBSD.
 - [wuzz](https://github.com/asciimoo/wuzz): Interactive cli tool for HTTP inspection.
